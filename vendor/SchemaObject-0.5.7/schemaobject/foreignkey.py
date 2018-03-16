@@ -38,9 +38,12 @@ def foreign_key_schema_builder(table):
                    K.TABLE_SCHEMA, K.TABLE_NAME, K.COLUMN_NAME,
                    K.REFERENCED_TABLE_SCHEMA, K.REFERENCED_TABLE_NAME, K.REFERENCED_COLUMN_NAME,
                    K.POSITION_IN_UNIQUE_CONSTRAINT
-            FROM information_schema.KEY_COLUMN_USAGE K, information_schema.TABLE_CONSTRAINTS T
-            WHERE K.CONSTRAINT_NAME = T.CONSTRAINT_NAME
-            AND T.CONSTRAINT_TYPE = 'FOREIGN KEY'
+            FROM information_schema.KEY_COLUMN_USAGE K
+			JOIN information_schema.TABLE_CONSTRAINTS T
+			  ON T.CONSTRAINT_NAME = K.CONSTRAINT_NAME
+			 AND T.CONSTRAINT_SCHEMA = K.CONSTRAINT_SCHEMA
+			 AND T.TABLE_NAME = K.TABLE_NAME
+            WHERE T.CONSTRAINT_TYPE = 'FOREIGN KEY'
             AND K.CONSTRAINT_SCHEMA='%s'
             AND K.TABLE_NAME='%s'
             AND K.REFERENCED_TABLE_NAME is not null
