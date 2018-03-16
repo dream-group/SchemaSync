@@ -90,6 +90,24 @@ def parse_cmd_line(fn):
                           help=("sync the COMMENT field for all "
                                 "tables AND columns"))
 
+        parser.add_option("-v", "--sync-views",
+                          dest="sync_views",
+                          action="store_true",
+                          default=False,
+                          help=("sync the views"))
+
+        parser.add_option("-t", "--sync-triggers",
+                          dest="sync_triggers",
+                          action="store_true",
+                          default=False,
+                          help=("sync the triggers"))
+
+        parser.add_option("-p", "--sync-procedures",
+                          dest="sync_procedures",
+                          action="store_true",
+                          default=False,
+                          help=("sync the procedures"))
+
         parser.add_option("-D", "--no-date",
                           dest="no_date",
                           action="store_true",
@@ -137,14 +155,18 @@ def parse_cmd_line(fn):
                                 tag=options.tag,
                                 charset=options.charset,
                                 sync_auto_inc=options.sync_auto_inc,
-                                sync_comments=options.sync_comments))
+                                sync_comments=options.sync_comments,
+                                sync_views=options.sync_views,
+                                sync_triggers=options.sync_triggers,
+                                sync_procedures=options.sync_procedures))
 
     return processor
 
 
 def app(sourcedb='', targetdb='', version_filename=False,
         output_directory=None, log_directory=None, no_date=False,
-        tag=None, charset=None, sync_auto_inc=False, sync_comments=False):
+        tag=None, charset=None, sync_auto_inc=False, sync_comments=False,
+        sync_views=False, sync_triggers=False, sync_procedures=False):
     """Main Application"""
 
     options = locals()
@@ -262,38 +284,40 @@ def app(sourcedb='', targetdb='', version_filename=False,
         p_buffer.write(target_obj.selected.fk_checks(1) + '\n')
         r_buffer.write(target_obj.selected.fk_checks(1) + '\n')
 
-    for patch, revert in syncdb.sync_views(source_obj.selected, target_obj.selected):
-        if patch and revert:
-            if not db_selected:
-                p_buffer.write(target_obj.selected.select() + '\n')
-                r_buffer.write(target_obj.selected.select() + '\n')
-                db_selected = True
+    if options['sync_views']:
+        for patch, revert in syncdb.sync_views(source_obj.selected, target_obj.selected):
+            if patch and revert:
+                if not db_selected:
+                    p_buffer.write(target_obj.selected.select() + '\n')
+                    r_buffer.write(target_obj.selected.select() + '\n')
+                    db_selected = True
 
-            p_buffer.write(patch + '\n')
-            r_buffer.write(revert + '\n')
+                p_buffer.write(patch + '\n')
+                r_buffer.write(revert + '\n')
 
-    for patch, revert in syncdb.sync_triggers(source_obj.selected, target_obj.selected):
-        if patch and revert:
-            if not db_selected:
-                p_buffer.write(target_obj.selected.select() + '\n')
-                r_buffer.write(target_obj.selected.select() + '\n')
-                db_selected = True
+    if options['sync_triggers']:
+        for patch, revert in syncdb.sync_triggers(source_obj.selected, target_obj.selected):
+            if patch and revert:
+                if not db_selected:
+                    p_buffer.write(target_obj.selected.select() + '\n')
+                    r_buffer.write(target_obj.selected.select() + '\n')
+                    db_selected = True
 
-            p_buffer.write(patch + '\n')
-            r_buffer.write(revert + '\n')
+                p_buffer.write(patch + '\n')
+                r_buffer.write(revert + '\n')
 
-    for patch, revert in syncdb.sync_procedures(source_obj.selected, target_obj.selected):
-        if patch and revert:
+    if options['sync_procedures']:
+        for patch, revert in syncdb.sync_procedures(source_obj.selected, target_obj.selected):
+            if patch and revert:
+                if not db_selected:
+                    p_buffer.write(target_obj.selected.select() + '\n')
+                    r_buffer.write(target_obj.selected.select() + '\n')
+                    p_buffer.write(target_obj.selected.fk_checks(0) + '\n')
+                    r_buffer.write(target_obj.selected.fk_checks(0) + '\n')
+                    db_selected = True
 
-            if not db_selected:
-                p_buffer.write(target_obj.selected.select() + '\n')
-                r_buffer.write(target_obj.selected.select() + '\n')
-                p_buffer.write(target_obj.selected.fk_checks(0) + '\n')
-                r_buffer.write(target_obj.selected.fk_checks(0) + '\n')
-                db_selected = True
-
-            p_buffer.write(patch + '\n')
-            r_buffer.write(revert + '\n')
+                p_buffer.write(patch + '\n')
+                r_buffer.write(revert + '\n')
 
     if db_selected:
         p_buffer.write(target_obj.selected.fk_checks(1) + '\n')
