@@ -40,15 +40,16 @@ def foreign_key_schema_builder(table):
                    K.POSITION_IN_UNIQUE_CONSTRAINT
             FROM information_schema.KEY_COLUMN_USAGE K
 			JOIN information_schema.TABLE_CONSTRAINTS T
-			  ON T.CONSTRAINT_NAME = K.CONSTRAINT_NAME
-			 AND T.CONSTRAINT_SCHEMA = K.CONSTRAINT_SCHEMA
-			 AND T.TABLE_NAME = K.TABLE_NAME
-            WHERE T.CONSTRAINT_TYPE = 'FOREIGN KEY'
-            AND K.CONSTRAINT_SCHEMA='%s'
-            AND K.TABLE_NAME='%s'
+              ON T.CONSTRAINT_TYPE = 'FOREIGN KEY'
+			 AND T.CONSTRAINT_NAME = K.CONSTRAINT_NAME
+			 AND T.TABLE_SCHEMA = '%s'
+			 AND T.TABLE_NAME = '%s'
+            WHERE TRUE
+            AND K.TABLE_SCHEMA = '%s'
+            AND K.TABLE_NAME = '%s'
             AND K.REFERENCED_TABLE_NAME is not null
             """
-    constraints = conn.execute(sql % (table.parent.name, table.name))
+    constraints = conn.execute(sql % (table.parent.name, table.name, table.parent.name, table.name))
 
     if not constraints:
         return fkeys
