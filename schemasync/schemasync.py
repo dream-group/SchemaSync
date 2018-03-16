@@ -24,6 +24,9 @@ __license__ = "Apache 2.0"
 # supress MySQLdb DeprecationWarning in Python 2.6
 warnings.simplefilter("ignore", DeprecationWarning)
 
+import sys
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/../vendor/SchemaObject-0.5.7/')
+
 try:
     import MySQLdb
 except ImportError:
