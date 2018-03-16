@@ -33,9 +33,9 @@ OPTIONS
                       if a file with the same name already exists.
 -a, --sync-auto-inc   sync the AUTO_INCREMENT value for each table.
 -c, --sync-comments   sync the COMMENT field for all tables AND columns
--c, --sync-views      sync the views
--c, --sync-triggers   sync the triggers
--c, --sync-procedures sync the procedures
+-v, --sync-views      sync the views
+-t, --sync-triggers   sync the triggers
+-p, --sync-procedures sync the procedures
 -D, --no-date         removes the date from the file format
 --charset=CHARSET     set the connection charset, default: utf8
 --tag=TAG             tag the migration scripts as <database>_<tag>.
